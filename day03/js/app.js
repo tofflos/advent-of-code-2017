@@ -1,186 +1,119 @@
 "use strict";
 
-const render = grid => {
-    for (let y = 0; y < grid.length; y++) {
-        let s = "";
-        for (let x = 0; x < grid[y].length; x++) {
-            s += grid[y][x].toString().padStart(3, " ") + " ";
-        }
-        console.log(s);
-    }
-    console.log("");
-}
+const isEven = n => n % 2 === 0;
+const manhattanDistance = (p, q) => Math.abs(p.x - q.x) + Math.abs(p.y - q.y);
 
-const distance = (p, q) => Math.abs(p.x - q.x) + Math.abs(p.y - q.y);
-
-const play = rounds => {
+const part1 = rounds => {
     let size = Math.ceil(Math.sqrt(rounds));
 
-    if (size % 2 === 0) {
+    if (isEven(size)) {
         size++
     }
 
-    const arr = Array(size).fill(0).map(() => Array(size).fill(0));
+    const board = Array(size).fill(0).map(() => Array(size).fill(0));
 
-    let currentX = Math.floor(size / 2);
-    let currentY = Math.floor(size / 2);
+    let x = Math.floor(size / 2);
+    let y = Math.floor(size / 2);
 
-    const p = {
-        x: currentX,
-        y: currentY
-    }
+    const p = { x: x, y: y };
 
     let direction = "down";
 
     for (let i = 1; i < rounds; i++) {
-        arr[currentY][currentX] = i;
+        board[y][x] = i;
 
-        // render(arr);
-
-        if (direction === "down" && arr[currentY][currentX + 1] === 0) {
-            currentX++;
+        if (direction === "down" && board[y][x + 1] === 0) {
+            x++;
             direction = "right";
-        } else if (direction === "right" && arr[currentY - 1][currentX] === 0) {
-            currentY--;
+        } else if (direction === "right" && board[y - 1][x] === 0) {
+            y--;
             direction = "up";
-        } else if (direction === "up" && arr[currentY][currentX - 1] === 0) {
-            currentX--;
+        } else if (direction === "up" && board[y][x - 1] === 0) {
+            x--;
             direction = "left";
-        } else if (direction === "left" && arr[currentY + 1][currentX] === 0) {
-            currentY++;
+        } else if (direction === "left" && board[y + 1][x] === 0) {
+            y++;
             direction = "down";
         } else if (direction === "left") {
-            currentX--;
+            x--;
         } else if (direction === "down") {
-            currentY++;
+            y++;
         } else if (direction === "right") {
-            currentX++;
+            x++;
         } else {
-            currentY--;
+            y--;
         }
-
     }
 
-    // render(arr)
+    const q = { x: x, y: y };
 
-    const q = {
-        x: currentX,
-        y: currentY
-    }
-
-    return distance(q, p);
+    return manhattanDistance(p, q);
 }
 
-console.log(play(361527));
+const getNeighbours = (board, x, y) => {
+    const neighbours = [];
+    const dx = [0, 1, 1, 1, 0, -1, -1, -1];
+    const dy = [-1, -1, 0, 1, 1, 1, 0, -1];
 
-const adjacent = (board, x, y) => {
-    const arr = [];
+    for (let i = 0; i < dy.length; i++) {
+        const p = { x: x + dx[i], y: y + dy[i] };
 
-    // var dx = [-1, 0, 1, 0]
-    // var dy = [0, -1, 0, 1]
-
-    // for (var i = 0; i < dy.length; i++) {
-    //     x += dx
-    //     y += dy
-
-    //     if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
-    //         arr.push(board[x][y])
-    //     }
-    // }
-
-    // Top
-    if (y > 0) {
-        arr.push(board[y - 1][x]);
+        if (0 <= p.x && p.x < board[p.y].length && 0 <= p.y && p.y < board.length) {
+            neighbours.push(board[p.y][p.x]);
+        }
     }
 
-    // Top Right
-    if (y > 0 && x < board[y - 1].length - 1) {
-        arr.push(board[y - 1][x + 1]);
-    }
-
-    // Right
-    if (x < board[y].length - 1) {
-        arr.push(board[y][x + 1]);
-    }
-
-    // Bottom Right
-    if (y < board.length - 1 && x < board[y + 1].length - 1) {
-        arr.push(board[y + 1][x + 1]);
-    }
-
-    // Bottom
-    if (y < board.length - 1) {
-        arr.push(board[y + 1][x]);
-    }
-
-    // Bottom Left
-    if (y < board.length - 1 && x > 0) {
-        arr.push(board[y + 1][x - 1]);
-    }
-
-    // Left
-    if (x > 0) {
-        arr.push(board[y][x - 1]);
-    }
-
-    // Top Left
-    if (x > 0 && y > 0) {
-        arr.push(board[y - 1][x - 1]);
-    }
-
-    return arr;
+    return neighbours;
 }
 
-const play2 = rounds => {
+const part2 = rounds => {
     let size = Math.ceil(Math.sqrt(rounds));
 
-    if (size % 2 === 0) {
+    if (isEven(size)) {
         size++
     }
 
-    const arr = Array(size).fill(0).map(() => Array(size).fill(0));
+    const board = Array(size).fill(0).map(() => Array(size).fill(0));
 
-    let currentX = Math.floor(size / 2);
-    let currentY = Math.floor(size / 2);
+    let x = Math.floor(size / 2);
+    let y = Math.floor(size / 2);
 
     let direction = "down";
 
     for (let i = 1; true; i++) {
         if (i == 1) {
-            arr[currentY][currentX] = 1
+            board[y][x] = 1
         } else {
-            arr[currentY][currentX] = adjacent(arr, currentX, currentY).reduce((a, b) => a + b);
+            board[y][x] = getNeighbours(board, x, y).reduce((a, b) => a + b);
         }
 
-        if (arr[currentY][currentX] > rounds) {
-            return arr[currentY][currentX];
+        if (board[y][x] > rounds) {
+            return board[y][x];
         }
 
-        // render(arr);
-
-        if (direction === "down" && arr[currentY][currentX + 1] === 0) {
-            currentX++;
+        if (direction === "down" && board[y][x + 1] === 0) {
+            x++;
             direction = "right";
-        } else if (direction === "right" && arr[currentY - 1][currentX] === 0) {
-            currentY--;
+        } else if (direction === "right" && board[y - 1][x] === 0) {
+            y--;
             direction = "up";
-        } else if (direction === "up" && arr[currentY][currentX - 1] === 0) {
-            currentX--;
+        } else if (direction === "up" && board[y][x - 1] === 0) {
+            x--;
             direction = "left";
-        } else if (direction === "left" && arr[currentY + 1][currentX] === 0) {
-            currentY++;
+        } else if (direction === "left" && board[y + 1][x] === 0) {
+            y++;
             direction = "down";
         } else if (direction === "left") {
-            currentX--;
+            x--;
         } else if (direction === "down") {
-            currentY++;
+            y++;
         } else if (direction === "right") {
-            currentX++;
+            x++;
         } else {
-            currentY--;
+            y--;
         }
-
     }
 }
 
-console.log(play2(361527));
+console.log("Part one: " + part1(361527));
+console.log("Part two: " + part2(361527));
